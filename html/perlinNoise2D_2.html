@@ -1,0 +1,61 @@
+<html>
+  <head>
+  </head>
+  <body>
+      <h1 style="color: steelblue;">Perlin-Noise 2D(Canvas)</h1>
+      <canvas id="2D"></canvas>
+      <script src="../Algorithm/perlinNoise.js"></script>
+      <script src="../lib//d3.v4.min.js"></script>
+
+      <script>
+        var unit = 0.0391;
+        var axisXLen = 900;
+        var axisYLen = 500;
+        // var rate = 360;
+        var rate = 40000
+        function generate2D(unitX, axisXLen,axisYLen, rate){
+          var pX, pY, points = [];
+          for(var i = 0; i < axisXLen; i++){
+            var pX = i * unit;
+            for(var j = 0; j < axisYLen; j++){
+              var pY = j * unit;
+              m = PerlinNoise_2D(pX, pY, Cosine_Interpolate) * rate;
+              // points.push([pX, pY]);
+              points.push({x:i, y:j, m: m});
+            }
+          }
+          return points;
+        }
+        var data = generate2D(unit, axisXLen,axisYLen, rate);
+        // canvas
+        var width = 960,
+            height = 600,
+            k = 1;
+        var color = d3.scaleCubehelix().domain([0, 5000]);
+        var canvas = d3.select("body").append("canvas")
+            .attr("width", width)
+            .attr("height", height);
+
+        var context = canvas.node().getContext("2d");
+
+        context.fillStyle = "#ccc";
+
+        function render() {
+          context.beginPath();
+          for(var i = 0; i < data.length; i++){
+            var x = data[i].x;
+            var y = data[i].y;
+            var m = Math.abs( data[i].m );
+            context.fillRect(x * k, y * k , k, k);
+            // context.fillStyle = d3.hsl( m / width * 360, 1, Math.floor(m / x) / y);
+            context.fillStyle = color(m);
+            // context.fillStyle = d3.hsl((m%360) , 1, Math.floor(m % 360) / 360);
+            context.stroke();
+          }
+        }
+        render();
+
+
+      </script>
+  </body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html> 
+<html>
+  <meta content="width=device-width;initial-scale=1">   
+  <head>
+  </head>
+  <body>
+  </body>
+  <script  type="text/javascript">
+     var SVGMatrix =  function(svgWidth, svgHeight, matrixWidth, matrixHeight , gapWidth, gapHeight, posWidth , posHeight,mounted){
+          this.svgWidth = svgWidth
+          this.svgHeight = svgHeight
+          this.matrixWidth = matrixWidth
+          this.matrixHeight = matrixHeight
+          this.gapWidth = gapWidth
+          this.gapHeight = gapHeight
+          this.posWidth = posWidth
+          this.posHeight = posHeight
+          this.mounted = mounted
+     }
+     
+     SVGMatrix.prototype.createSvg = function(){
+       if(this.svgWidth < this.matrixWidth) this.svgWidth = this.matrixWidth
+       if(this.svgHeight < this.matrixHeight) this.svgHeight = this.matrixHeight
+
+       let real_mtx_width = this.gapWidth + this.matrixWidth 
+       let real_mtx_hieght = this.gapHeight + this.matrixHeight
+
+       let remedyW = this.svgWidth / this.matrixWidth 
+       if(this.svgWidth % this.matrixWidth != 0)
+          remedyW = (remedyW | 0) + 1
+       this.svgWidth = remedyW * this.matrixWidth + (remedyW-1) * this.gapWidth
+      //  this.svgWidth = remedyW * real_mtx_width
+
+       let remedyH = this.svgHeight / this.matrixHeight 
+       if(this.svgHeight % this.matrixHeight != 0)
+          remedyH = (remedyH | 0) + 1
+       this.svgHeight = remedyH * this.matrixHeight + (remedyH-1) * this.gapHeight
+      //  this.svgHeight = remedyH * real_mtx_hieght
+
+       console.log(this.svgWidth, this.svgHeight)
+        var baseDom = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        // var baseDom = document.getElementById('mounted')
+        baseDom.setAttribute('width', this.svgWidth)
+        baseDom.setAttribute('height', this.svgHeight)
+        document.body.appendChild(baseDom)
+
+        let offsetDom = document.createElementNS("http://www.w3.org/2000/svg","g")
+        offsetDom.setAttribute('transform',`translate(${this.posWidth}, ${this.posHeight})`)
+
+        baseDom.appendChild(offsetDom)
+
+        console.log('real_mtx_width',real_mtx_width,real_mtx_hieght)
+        for(let i = 0, offsetX = real_mtx_width; i < (this.svgWidth/real_mtx_width|0)-1; i++,offsetX--){
+          let gDom = document.createElementNS("http://www.w3.org/2000/svg","g")
+          gDom.setAttribute('transform',`translate(${i * (real_mtx_width+1) }, 0)`)
+          for(let j = 0 ; j < (this.svgHeight/real_mtx_hieght|0)-2; j++){
+            let rect = document.createElementNS("http://www.w3.org/2000/svg","rect")
+            // width="10" height="10" x="-39" y="0" fill="#ebedf0"
+            rect.setAttribute('width', this.matrixWidth)
+            rect.setAttribute('height', this.matrixHeight)
+            rect.setAttribute('x', offsetX)
+            rect.setAttribute('y', j*real_mtx_hieght)
+            rect.setAttribute('fill',rgb(i,5))
+            gDom.appendChild(rect)
+          }
+          offsetDom.appendChild(gDom)
+        }
+
+        return baseDom
+      }
+      let colorPos = 0
+      let sign = -1
+      // let maxPix = 0xd4
+      // let minPix = 0x5f
+      let maxPix = 0xf4
+      let minPix = 0x2f
+      let color = [maxPix,minPix,maxPix]
+      let save = -1
+      function rgb(i,tick){
+          //  sign = sign * tick
+          //  if(i-save){
+          //     save = i
+          //     color[colorPos] = color[colorPos] + sign
+          //  }
+
+           if(color[colorPos] >= maxPix){
+              color[colorPos] = maxPix
+              sign = -1*tick
+              colorPos = (++colorPos) % color.length
+           }       
+           if(color[colorPos] <= minPix){
+              color[colorPos] = minPix
+              sign = 1*tick
+              colorPos = (++colorPos) % color.length
+           }
+          //  color[colorPos] = color[colorPos] + sign
+
+          //  console.log(color[0],color[1],color[2])
+           if(i-save){
+              save = i
+              color[colorPos] = color[colorPos] + sign
+           }
+           return `#${color[0].toString(16)}${color[1].toString(16)}${color[2].toString(16)}`
+      }
+      var svgM =new SVGMatrix(900,500,5,5,1,1,0,0)
+      window.onload = svgM.createSvg()
+  </script>
+</html>

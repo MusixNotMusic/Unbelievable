@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RGB Color Interpolation Gradient</title>
+    <style>
+        body>*{
+            margin:0 auto;
+            width:300px;
+        }
+        div{
+            height:300px;
+            background-color:rgb(0,0,0);
+        }
+        input{
+            display:block;
+            width:100%;
+        }
+    </style>
+</head>
+<body>
+    <div></div>
+    <p>R(<span>0</span>):<input type='range' id='red' min='0' max='255' value='0'/></p>
+    <p>G(<span>0</span>):<input type='range' id='green' min='0' max='255' value='0'/></p>
+    <p>B(<span>0</span>):<input type='range' id='blue' min='0' max='255' value='0'/></p>
+    <p>To RGB:<input type='text' value='255,255,255'/><button>Animation</button></p>
+    <script>
+        NodeList.prototype.forEach = Array.prototype.forEach;
+        var rgb = [0, 0, 0];
+
+        var div = document.querySelector('div'),
+            inputs = document.querySelectorAll("input[type='range']"),
+            toRGB = document.querySelector("input[type='text']"),
+            button = document.querySelector('button');
+
+        var red = inputs[0],
+            green = inputs[1],
+            blue = inputs[2];
+
+        var lock = false;
+
+        function change(i) {
+            var span = inputs[i].parentElement.querySelector('span');
+
+            return(function(e) {
+                var value;
+                if(e) {
+                    value = parseInt(e.target.value);
+                    span.innerHTML = value;
+                    rgb[i] = value;
+                } else {
+                    value = parseInt(inputs[i].value);
+                    span.innerHTML = value;
+                }
+                div.style.backgroundColor = 'rgb(' + Math.round(rgb[0]) + ',' + Math.round(rgb[1]) + ',' + Math.round(rgb[2]) + ')';
+            });
+        }
+
+        var redChange = change(0),
+            greenChange = change(1),
+            blueChange = change(2);
+
+        red.addEventListener('change', redChange);
+        green.addEventListener('change', greenChange);
+        blue.addEventListener('change', blueChange);
+
+        button.addEventListener('click', function() {
+            if(lock) {
+                return;
+            }
+            var finalValue = toRGB.value;
+            var patternRGB = /^(([0-9])|([1-9]\d)|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))[,](([0-9])|([1-9]\d)|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))[,](([0-9])|([1-9]\d)|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))$/;
+            if(!patternRGB.test(finalValue)) {
+                alert('Format is not correct, you should enter a value like 255,255,255');
+                return;
+            }
+            var finalValue = finalValue.split(',');
+            rf = finalValue[0];
+            gf = finalValue[1];
+            bf = finalValue[2];
+
+            lock = true;
+            red.disabled = true;
+            green.disabled = true;
+            blue.disabled = true;
+
+            rgb[0] = Math.round(rgb[0]);
+            rgb[1] = Math.round(rgb[1]);
+            rgb[2] = Math.round(rgb[2]);
+
+            var r = rgb[0],
+                g = rgb[1],
+                b = rgb[2];
+            ri = (rf - r) / 100;
+            gi = (gf - g) / 100;
+            bi = (bf - b) / 100;
+            setTimeout(function(i) {
+                i = i || 1;
+                rgb[0] += ri;
+                rgb[1] += gi;
+                rgb[2] += bi;
+                red.value = rgb[0];
+                green.value = rgb[1];
+                blue.value = rgb[2];
+                redChange();
+                greenChange();
+                blueChange();
+                if(i < 100) {
+                    var f = arguments.callee;
+                    setTimeout(function() {
+                        f(i + 1);
+                    }, 50);
+                } else {
+                    lock = false;
+                    red.disabled = false;
+                    green.disabled = false;
+                    blue.disabled = false;
+                }
+            }, 0);
+        });
+    </script>
+</body>
+</html>

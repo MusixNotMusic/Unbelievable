@@ -1,0 +1,77 @@
+<html>
+
+<head></head>
+
+<body>
+    <script src="../Algorithm/factorial.js"></script>
+    <script src="../lib//d3.js"></script>
+    <script src="../lib/hidpi-canvas.js"></script>
+    <script>
+        var width = 1600,
+            height = 1000;
+        var canvas = d3.select("body").append("canvas")
+            .attr("width", width)
+            .attr("height", height)
+            .style("background", "#eee");
+        var context = canvas.node().getContext("2d");
+        var colorRainbow = d3.interpolateRainbow;
+        // var colorRainbow = d3.interpolateSinebow;
+        var fonts = []
+        var tan = Math.tan;
+        var PI = Math.PI;
+
+        function generate(deep, h, delta, midX, midY) {
+            while (deep >= 0) {
+                for (var i = 0; i <= deep; i++) {
+                    var fontNum = C(i, deep);
+                    var coord = layoutX(deep, midX, midY, h, delta, i)
+                    var color = colorRainbow(i / 60);
+                    fonts.push({
+                        font: fontNum,
+                        x: coord[0],
+                        y: coord[1],
+                        color: color
+                    })
+                }
+                deep--;
+            }
+        }
+
+        function layoutX(n, midX, midY, h, delta, index) {
+            var x0 = midX - h * n / tan(delta);
+            var y = h * n + midY;
+            var x = x0 + diffX(delta, h) * index;
+            return [x, y];
+        }
+
+        function diffX(delta, h) {
+            return h * 2 / tan(delta);
+        }
+
+        function render() {
+            context.beginPath();
+            fonts.forEach(drawFont)
+            context.stroke();
+        }
+
+
+        function drawFont(item) {
+            context.fillStyle = item.color;
+            // context.fillStyle = "rgb(255, 120, 71)";
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            var fontSize = adapt(item.font + '');
+            context.font = fontSize + "px Times New Roman"
+            context.fillText(item.font, item.x, item.y);
+        }
+
+        function adapt(font) {
+            var fontSize = 24 - font.length * 2;
+            return fontSize >= 5 ? fontSize : 5;
+        }
+        generate(30, 22, PI / 4, width / 2, 40);
+        render();
+    </script>
+</body>
+
+</html>

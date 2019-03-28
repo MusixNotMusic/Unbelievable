@@ -1,0 +1,139 @@
+<html>
+  <head>
+    <style>
+      html,body{
+        margin:0; padding: 0;
+      }
+      canvas{
+        background: cadetblue;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        margin: auto 0;
+        width: 100%;
+      }  
+      #ctlBox{
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        top:0;
+        left:0;
+      }
+    </style>
+  </head>
+</html>
+<body>
+  <div id="ctlBox">
+    <input type="text" id="del">
+    <button id="del-btn" onclick="deleteHandle">Del</button>
+  </div>
+  <canvas width="1200" height="600" style="background: cadetblue;"></canvas>
+  <script src="../Algorithm/blackRedTree.js"></script> 
+     <script src="../lib/d3.js"></script>
+  <script>
+      var canvas = d3.select("canvas"),
+      ctx = canvas.node().getContext("2d"),
+      width = canvas.property("width"),
+      height = canvas.property("height");
+      var x1 = 0, y1 =0, x2 = height, y2 = height;
+      canvas.call(d3.zoom()
+            .scaleExtent([1 / 16, Infinity])
+            .on("zoom", zoomed));
+      // 初始化节点
+      var widthUnit = 15;
+      var heightUnit = 40;
+      insertNodes(T, 60);
+      // inorder(T.root, 0, widthUnit, heightUnit);
+      // var offsetX = width/2 - T.root.x, offsetY = 30;
+      // nodes.forEach((node)=>{
+      //   node.x = node.x + offsetX;
+      //   node.y = node.y + offsetY;
+      // })
+
+      function getCoord(){
+        links = [];
+        nodes = [];
+        inorder(T.root, 0, widthUnit, heightUnit);
+        var offsetX = width/2 - T.root.x, offsetY = 30;
+        nodes.forEach((node)=>{
+          node.x = node.x + offsetX;
+          node.y = node.y + offsetY;
+        })
+      }
+      
+      // 事件  
+      function zoomed() {
+        console.log('zoomed', width, height);
+        d3Transform = d3.event.transform;
+        ctx.save();
+        ctx.clearRect(0, 0, width, height);
+        ctx.translate(d3.event.transform.x, d3.event.transform.y );
+        ctx.scale(d3.event.transform.k, d3.event.transform.k);
+        render();
+        ctx.restore();
+      }
+      function deleteHandle(){
+        console.log('deleteHandle');
+        var ele = document.getElementById('del');
+        var value = ele.value;
+        console.log('deleteNode', value);
+        var node = find_node(T, Number(value));
+        if(!node) { alert('节点不存在'); return; }
+        rb_delete(T, node);
+        getCoord();
+        render();
+      }
+      function registerEvent(){
+        var delBtn = document.getElementById('del-btn');
+        delBtn.addEventListener('click',deleteHandle);
+      }
+      // 绘制
+      function drawDot(node){
+        ctx.beginPath();
+        ctx.arc(node.x, node.y , 10, 0, 2*Math.PI);
+        // ctx.strokeStyle = "#aa3a5c";
+        ctx.fillStyle = node.color;
+        ctx.fill();
+        // ctx.stroke();
+      }
+      function drawFont(item){
+        ctx.fillStyle = 'yellow';
+        // ctx.fillStyle = "rgb(255, 120, 71)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        var fontSize = adapt(item.font+'');
+        ctx.font = fontSize+"px Times New Roman"  
+        ctx.fillText(item.key, item.x , item.y );
+      }
+      function adapt(font){
+        return 30 - font.length*2;
+      }
+      function drawTitle(item){
+        // ctx.fillStyle = 'green';
+        ctx.fillStyle = 'yellow';
+        // ctx.fillStyle = "rgb(255, 120, 71)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = item.fontSize+"px Times New Roman"  
+        ctx.fillText(item.key, item.x , item.y);
+      }
+      function drawLink(link){
+        if(!link.src || !link.dist) return;
+        ctx.beginPath();
+        ctx.moveTo(link.src.x , link.src.y  );
+        ctx.lineTo(link.dist.x , link.dist.y  );
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "orange";
+        ctx.stroke();
+      }
+
+      function render(){
+        // drawTitle({key:'Red-Black-Tree', x: 8, y:1, color:'green', fontSize: 30});
+        // 初始化root 为 width/2
+        links.forEach(drawLink);
+        nodes.forEach(drawDot);
+        nodes.forEach(drawFont);
+      }
+      getCoord();
+      render();
+      registerEvent();
+  </script>
+</body>

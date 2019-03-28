@@ -1,0 +1,70 @@
+<html>
+  <head>
+      <style>
+          body {
+            font: 10px sans-serif;
+          }
+          .axis path,
+          .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+          }
+          .line {
+            fill: none;
+            stroke: steelblue;
+            stroke-width: 1.5px;
+          }
+          </style>
+  </head>
+  <body>
+      <h1 style="color: steelblue;">Perlin-Noise 2D(SVG)</h1>
+      <script src="../Algorithm/perlinNoise.js"></script>
+      <script src="../lib/d3.v3.min.js"></script>
+
+      <script>
+        var unit = 0.1891;
+        var axisXLen = 100;
+        var axisYLen = 100;
+        var rate = 1600;
+        function generate2D(unitX, axisXLen,axisYLen, rate){
+          var pX, pY, points = [];
+          for(var i = 0; i < axisXLen; i++){
+            var pX = i * unit;
+            for(var j = 0; j < axisYLen; j++){
+              var pY = j * unit;
+              m = PerlinNoise_2D(pX, pY, Cosine_Interpolate) * rate;
+              // points.push([pX, pY]);
+              points.push({x:i, y:j, m: m});
+            }
+          }
+          return points;
+        }
+        var data = generate2D(unit, axisXLen,axisYLen, rate);
+
+        var z = 5;
+        var w = axisXLen*z,
+        h = axisYLen*z;
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", w)
+        .attr("height", h);
+
+    svg.selectAll("rect")
+        .data(data)
+        .enter().append("rect")
+        .attr("transform", translate)
+        .attr("width", z)
+        .attr("height", z)
+        .style("fill", function(d) { 
+          return d3.hsl(d.m / h * 360, 1, Math.floor(d.m / d.x) / d.y); 
+        })
+
+    function translate(d) {
+      return "translate(" + (d.x*z)   + "," + Math.floor(d.y*z)  + ")";
+    }
+
+
+     </script>
+  </body>
+</html>

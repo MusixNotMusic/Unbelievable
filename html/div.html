@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <style>
+      .div1{
+        height: 100;
+        width: 100;
+        border: 1px solid #000;
+        margin-bottom: 50;
+      }
+      .div2{
+        height: 100;
+        width: 100;
+        border: 1px solid #000;
+        margin-top: 50;
+      }
+      .note{
+        color: orange;
+        font-size:14px;
+        margin-top:20px;
+        border-radius: 5px;
+        /* border: 1px soild #ccc; */
+        width: 200px;
+      }
+    </style>
+    <link rel="stylesheet" href="../global.css">
+  </head>
+  <body>
+    <div >
+      <div class="div1"></div>
+      <div class="div2"></div>
+    </div>
+      
+     <p class="note">
+        1，兄弟关系的盒子margin塌陷的解决方法：
+        给上面的盒子加个margin-bottom（这个距离等于两个盒子之间的距离）或者给下面的盒子加个margin-top（这个距离等于两个盒子之间的距离）。
+      </p>
+      <p class="note">
+        2 ，父子关系的盒子margin塌陷的解决方法：
+        给父盒子加上下边框或者给父盒子添加上下padding。
+     </p>
+  </body>
+</html>

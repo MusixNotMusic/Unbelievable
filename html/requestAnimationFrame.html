@@ -1,0 +1,60 @@
+<html>
+  <head> 
+    <!--参考  https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestAnimationFrame  -->
+    <style>
+      #SomeElementYouWantToAnimate{
+        width: 10px;
+        height:10px; 
+        border:1px solid orangered;
+        background:steelblue;
+        float: left;
+      }
+      #SomeElementYouWantToAnimate1{
+        width: 10px;
+        height:10px; 
+        border:1px solid orangered;
+        background:steelblue;
+        float: left;
+      }
+      #SomeElementYouWantToAnimate2{
+        width: 10px;
+        height:10px; 
+        border:1px solid orangered;
+        background:steelblue;
+        float: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="SomeElementYouWantToAnimate"></div>
+    <div id="SomeElementYouWantToAnimate1"></div>
+    <div id="SomeElementYouWantToAnimate2"></div>
+    <script>
+      var start = null;
+      var element = document.getElementById('SomeElementYouWantToAnimate');
+      var element1 = document.getElementById('SomeElementYouWantToAnimate1');
+      var element2 = document.getElementById('SomeElementYouWantToAnimate2');
+      element.style.position = 'absolute';
+      element1.style.position = 'absolute';
+      element2.style.position = 'absolute';
+
+      function step(timestamp) {
+        if (!start) start = timestamp;
+        var progress = timestamp - start;
+        var currentPosition = 0;
+        currentPosition = Math.sin((progress) / 2000 * Math.PI)*1000+1000;
+        currentPosition1 = Math.sin((progress) / 2250 * Math.PI)*1000+1000;
+        currentPosition2 = Math.sin((progress) / 2400 * Math.PI)*1000+1000;
+        element.style.left = currentPosition/5+ 'px';
+        element1.style.left = currentPosition1/5+ 'px';
+        element2.style.left = currentPosition2/5+ 'px';
+        // if(progress <= 20000){
+        //   window.requestAnimationFrame(step);
+        // }
+        window.requestAnimationFrame(step);
+      }
+
+     var rafId = window.requestAnimationFrame(step);
+    </script>
+  </body>
+</html>
