@@ -76,11 +76,46 @@ function greed_activity_selector(s, f) {
     return A;
 }
 
-var obj = RandomGreedArray(115, 10);
-console.log(obj.s1);
-console.log(obj.f1);
-runTime(activity_greed_all_path)(obj.s1, obj.f1)
-runTime(recursive_activity_selector)(obj.s1, obj.f1, -1, obj.s1.length - 1)
-runTime(greed_activity_selector)(obj.s1, obj.f1)
-    // var path = activity_greed_all_path(obj.s1, obj.f1);
-    // console.log(path);
+/**
+ * 
+ * @param {Number} denomination  面额
+ * @param {Array} changes_list 零钱列表
+ * @param {Array} coins  找零结果
+ * 有n美分， 最少硬币找零
+ */
+function greed_coins_change_recursive(denomination, changes_list, coins) {
+    for (var i = 0; i < changes_list.length; i++) {
+        var changes_value = changes_list[i];
+        if (denomination - changes_value >= 0) {
+            coins[changes_value] || (coins[changes_value] = { size: 0 });
+            coins[changes_value].size++;
+            return greed_coins_change_recursive(denomination - changes_value, changes_list, coins);
+        }
+    }
+    return coins;
+}
+
+function greed_coins_change(denomination, changes_list, coins) {
+    for (var i = 0; i < changes_list.length; i++) {
+        var changes_value = changes_list[i];
+        while (denomination >= changes_value) {
+            coins[changes_value] || (coins[changes_value] = { size: 0 });
+            coins[changes_value].size++;
+            denomination = denomination - changes_value;
+        }
+    }
+    return coins;
+}
+
+
+
+
+// var obj = RandomGreedArray(25, 10);
+// console.log(obj.s1);
+// console.log(obj.f1);
+// runTime(activity_greed_all_path)(obj.s1, obj.f1)
+// runTime(recursive_activity_selector)(obj.s1, obj.f1, -1, obj.s1.length - 1)
+// runTime(greed_activity_selector)(obj.s1, obj.f1)
+// runTime(greed_coins_change_recursive)(1113271, [25, 10, 5, 1], {});
+runTime(greed_coins_change)(1113271, [25, 10, 5, 1], {});
+// greed_coins_change(121, [25, 10, 5, 1], []);

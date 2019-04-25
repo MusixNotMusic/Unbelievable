@@ -1,118 +1,127 @@
 <html>
-  <head></head>
-  <body>
-     <canvas id="canvas" width="1000" height="800" style="background:#eee"></canvas>
-     <input id="input" value="10">
-     <button id="submit">修改</button>
-     <script src="../Algorithm/quadTree.js"></script>
-     <script src="../lib/d3.js"></script>
-     <script>
-      
-      var canvas = d3.select("canvas"),
-        ctx = canvas.node().getContext("2d"),
-        width = canvas.property("width"),
-        height = canvas.property("height")
-      var x1 = 0, y1 =0, x2 = height, y2 = height;
+
+<head></head>
+
+<body>
+    <canvas id="canvas" width="1000" height="800" style="background:#eee"></canvas>
+    <input id="input" value="10">
+    <button id="submit">修改</button>
+    <script src="../Algorithm/quadTree.js"></script>
+    <script src="../lib/d3.js"></script>
+    <script>
+        var canvas = d3.select("canvas"),
+            ctx = canvas.node().getContext("2d"),
+            width = canvas.property("width"),
+            height = canvas.property("height")
+        var x1 = 0,
+            y1 = 0,
+            x2 = height,
+            y2 = height;
         canvas.call(d3.zoom()
-          .scaleExtent([1 / 16, Infinity])
-          .on("zoom", zoomed));
+            .scaleExtent([1 / 16, Infinity])
+            .on("zoom", zoomed));
 
-      var _coords = randomCoords(3000);
-      var d3Transform = null;
-      function registeEvent(){
-        var input = document.getElementById('input');
-        var submit = document.getElementById('submit');
-        submit.addEventListener('click', (e)=>{
-          maxLen = input.value;
-          reset();
-          render();
-        })   
-        input.onkeydown = () => {
-            if(event.keyCode==13){   
-              maxLen = input.value;
-              reset();
-              render();
-            } 
+        var _coords = randomCoords(10000);
+        var d3Transform = null;
+
+        function registeEvent() {
+            var input = document.getElementById('input');
+            var submit = document.getElementById('submit');
+            submit.addEventListener('click', (e) => {
+                maxLen = input.value;
+                reset();
+                render();
+            })
+            input.onkeydown = () => {
+                if (event.keyCode == 13) {
+                    maxLen = input.value;
+                    reset();
+                    render();
+                }
+            }
         }
-      }
 
 
-      function zoomed() {
-        // console.log('zoomed', d3.event.transform);
-        d3Transform = d3.event.transform;
-        ctx.save();
-        ctx.clearRect(0, 0, width, height);
-        ctx.translate(d3.event.transform.x, d3.event.transform.y);
-        ctx.scale(d3.event.transform.k, d3.event.transform.k);
+        function zoomed() {
+            // console.log('zoomed', d3.event.transform);
+            d3Transform = d3.event.transform;
+            ctx.save();
+            ctx.clearRect(0, 0, width, height);
+            ctx.translate(d3.event.transform.x, d3.event.transform.y);
+            ctx.scale(d3.event.transform.k, d3.event.transform.k);
+            render();
+            ctx.restore();
+        }
+
+        function quadTree() {
+            // var x1 = 0, y1 =0, x2 = width, y2 = height;
+            var root = new QuadNode(x1, y1, x2, y2);
+
+            for (var i = 0; i < _coords.length; i++) {
+                var _coord = _coords[i];
+                add(_coord, root);
+            }
+            var dot = [];
+            var rect = [];
+            dot = traverse(root, rect, dot);
+            return {
+                dot: dot,
+                rect: rect
+            }
+        }
+
+        function randomCoords(len) {
+            var coords = [];
+            for (var i = 0; i < len; i++) {
+                var x = Math.random() * (x2 - x1) + x1 / 2;
+                var y = Math.random() * (y2 - y1) + y1 / 8;
+                coords.push([x | 0, y | 0]);
+            }
+            return coords;
+        }
+
+        function drawRect(x1, y1, x2, y2) {
+            ctx.lineWidth = 0.1;
+            ctx.strokeStyle = "#aa3a5c";
+            ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+            ctx.fill();
+        }
+
+        function drawDot(x1, y1) {
+            ctx.beginPath();
+            ctx.arc(x1, y1, 0.6, 0, 2 * Math.PI);
+            // ctx.strokeStyle = "#aa3a5c";
+            ctx.fillStyle = "steelblue";
+            ctx.fill();
+            // ctx.stroke();
+        }
+        // 重置 缩放 平移坐标
+        function reset() {
+            if (!d3Transform) return;
+            d3Transform.x = 1;
+            d3Transform.y = 1;
+            d3Transform.k = 1;
+        }
+        // 绘制
+        function render() {
+            var data = quadTree();
+
+            // ctx.clearRect(x1,y1, x2-x1, y2-y1);
+            ctx.clearRect(x1, y1, width, height);
+            ctx.beginPath();
+            data.rect.forEach((item) => {
+                drawRect(item[0], item[1], item[2], item[3]);
+            })
+            ctx.stroke();
+            // ctx.beginPath();
+            data.dot.forEach((item) => {
+                drawDot(item[0], item[1])
+            })
+            ctx.stroke();
+        }
         render();
-        ctx.restore();
-      }
+        registeEvent();
+    </script>
+</body>
 
-      function quadTree(){
-        // var x1 = 0, y1 =0, x2 = width, y2 = height;
-        var root = new QuadNode(x1, y1, x2, y2);
-
-        for(var i = 0; i < _coords.length; i++){
-          var _coord = _coords[i];
-          add(_coord, root);
-        }
-        var dot = [];
-        var rect = [];
-        dot = traverse(root, rect, dot);  
-        return {dot: dot, rect: rect}  
-      }
-
-      function randomCoords(len){
-        var coords = [];
-        for(var i = 0; i < len; i++){
-          var x = Math.random()*(x2-x1) + x1/2;
-          var y = Math.random()*(y2-y1) + y1/8;
-          coords.push([x | 0,y | 0]);
-        }
-        return coords;
-      }
-
-      function drawRect(x1,y1, x2,y2){
-        ctx.lineWidth = 0.1;
-        ctx.strokeStyle = "#aa3a5c";
-        ctx.strokeRect(x1, y1, x2 - x1, y2-y1);
-        ctx.fill();
-      }
-
-      function drawDot(x1, y1){
-        ctx.beginPath();
-        ctx.arc(x1, y1, 0.6, 0, 2*Math.PI);
-        // ctx.strokeStyle = "#aa3a5c";
-        ctx.fillStyle = "steelblue";
-        ctx.fill();
-        // ctx.stroke();
-      }
-      // 重置 缩放 平移坐标
-      function reset(){
-        if(!d3Transform) return;
-        d3Transform.x = 1;
-        d3Transform.y = 1;
-        d3Transform.k = 1;
-      }
-      // 绘制
-      function render(){
-          var data = quadTree();
-
-          // ctx.clearRect(x1,y1, x2-x1, y2-y1);
-          ctx.clearRect(x1,y1, width, height);
-          ctx.beginPath();
-          data.rect.forEach((item)=>{
-            drawRect(item[0], item[1], item[2],item[3]);
-          })
-          ctx.stroke();
-          // ctx.beginPath();
-          data.dot.forEach((item)=>{
-            drawDot(item[0], item[1])
-          })
-          ctx.stroke();
-      }
-      render();
-      registeEvent();
-     </script>
-  </body>
 </html>
